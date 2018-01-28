@@ -1,0 +1,202 @@
+﻿<link rel="import" href="../bower_components/polymer/polymer.html" />
+<link rel="import" href="bootstrap.html" />
+<link rel="import" href="FontAwesome.html" />
+<dom-module id="poly-check-combobox">
+    <template>
+        <style>
+            span.input-group-addon {
+                width: auto;
+            }
+            div#wrapper {
+                position: relative;
+            }
+            div.dropdown-menu {
+                overflow: auto;
+                padding: 0;
+            }
+            div.dropdown-menu ul {
+                margin-top: 3px;
+                margin-bottom: 5px;
+                padding: 0 2px 0 10px;
+            }
+            .dropdown-menu ul > li {
+                color: #262626;
+            }
+            .dropdown-menu ul > li:hover {
+                background-color: #f5f5f5;
+            }
+            .dropdown-menu ul > li span
+            {
+                padding: 3px 2px;
+                font-weight: normal;
+                line-height: 1.42857143;
+                color: #333;
+                white-space: nowrap;
+            }
+            .dropdown-menu ul > li.active {
+                color: #fff;
+                text-decoration: none;
+                background-color: #337ab7;
+                outline: 0;
+            }
+            .dropdown-menu li {
+                list-style-type: none;
+            }
+        </style>
+        <div id="wrapper">
+            <div class="input-group">
+                <input class="form-control" type="text" readonly value="[[text]]" />
+                <span class="input-group-addon dropdown-toggle" on-click="toggle">
+                    <span class="caret"></span>
+                </span>
+            </div>
+            <div class="dropdown-menu">
+                <input class="form-control" type="text" placeholder="filter items" autocomplete="off" value="{{filterText::input}}" />
+                <ul>
+                    <template id="comboItems" is="dom-repeat" items="[[options]]" filter="{{computeFilter(filterText)}}">                        
+                        <li data-value$="[[item.value]]" on-click="toggleItem">
+                            <template is="dom-if" if="[[!item.isSelected]]">
+                                <i class="fa fa-square-o"></i>
+                            </template>
+                            <template is="dom-if" if="[[item.isSelected]]">
+                                <i class="fa fa-check fa-square-o"></i>
+                            </template>
+                            <span>[[item.text]]</span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'poly-check-combobox',
+        properties: {
+            options: {
+                type: Array,
+                value: []
+            },
+            selectToggled: {
+                type: Boolean,
+                value: false
+            },
+            comboWidth: {
+                type: String,
+                value: '200px'
+            },
+            pickerWidth: {
+                type: String
+            },
+            pickerMaxHeight: {
+                type: String,
+                value: '220px'
+            },
+            value: {
+                type: Array,
+                value: [],
+                observer: 'valueChanged'
+            },
+            text: {
+                type: String,
+                reflectToAttribute: true
+            }
+        },
+        observers: [
+            'widthChanged(comboWidth, pickerWidth, pickerMaxHeight)'
+        ],
+        ready: function () {
+            var me = this;
+
+            /*this.$.wrapper.querySelector('.input-group').addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                event.cancelBubble = true;
+                event.returnValue = false;
+            });
+            document.body.addEventListener('click', function () {
+                me.setToggled(false);
+            });*/
+            this.$.wrapper.querySelector('.input-group').style.width = this.comboWidth;
+            this.$.wrapper.querySelector('.dropdown-menu').style.width = this.comboWidth;
+            this.$.wrapper.querySelector('.dropdown-menu').style.maxHeight = this.pickerMaxHeight;
+        },
+        widthChanged: function (comboWidth, pickerWidth, pickerMaxHeight) {
+            this.$.wrapper.querySelector('.input-group').style.width = comboWidth;
+            this.$.wrapper.querySelector('.dropdown-menu').style.width = pickerWidth || comboWidth;
+            this.$.wrapper.querySelector('.dropdown-menu').style.maxHeight = pickerMaxHeight;
+        },
+        valueChanged: function (newValue, oldValue) {
+            var lis = this.$.wrapper.querySelectorAll('.dropdown-menu li');
+            for (var i = 0; i < lis.length; i++) {
+                if (newValue.indexOf(lis[i].getAttribute('data-value')) > -1) {
+                    lis[i].classList.add('active');
+                    lis[i].firstChild.firstChild.checked = true;
+                    this.text = lis[i].firstChild.innerText;
+                }
+                else {
+                    lis[i].classList.remove('active');
+                    lis[i].firstChild.firstChild.checked = false;
+                }
+            }
+        },
+        computeFilter: function (text) {
+            return function (item) {
+                return item.text.toLowerCase().indexOf(text.toLowerCase()) > -1;
+            }
+        },
+        toggle: function () {
+            //console.log('toggled');
+            this.selectToggled = !this.selectToggled;
+            this.setToggled(this.selectToggled);
+        },
+        setToggled: function (state) {
+            var cssDisplay = state === true ? 'block' : 'none';
+            this.$$('.dropdown-menu').style.display = cssDisplay;
+        },
+        addListItem: function (value, text, isSelected) {
+            if (text === undefined) text = value;
+            this.push('options', { text: text, value: value, isSelected: isSelected });
+        },
+        removeListItem: function (value) {
+            var lis = this.options;
+            var foundIndex = -1;
+            for (var i = 0; i < lis.length; i++) {
+                if (this.options[i].value === value) {
+                    foundIndex = i;
+                    break;
+                }
+            }
+            if (foundIndex > -1)
+                this.splice('options', foundIndex, 1);
+        },
+        toggleItem: function (e) {
+            var selectedItem = this.$.comboItems.itemForElement(e.target);
+            selectedItem.isSelected = !selectedItem.isSelected;
+
+            var lis = this.$$('.dropdown-menu').querySelectorAll('li');
+            var li = e.currentTarget;
+            if (selectedItem.isSelected === true) {
+                li.classList.add('active');
+                this.push('value', li.getAttribute('data-value'));
+            }
+            else {
+                li.classList.remove('active');
+                for (var i = 0; i < lis.length; i++) {
+                    if (lis[i] === li) {
+                        this.splice('value', i, 1);
+                    }
+                }
+            }
+            //this.setToggled(false);
+            this.fire("item-selected", this.value);
+        }
+    });
+    /* remaining tasks
+        1. dropdown should close on document click
+        2. text setting and getting on values select
+        3. selection of checkbox on li click
+        4. selecteditems cannot be set from consumer code
+        5. checkbox does not work
+    */
+</script>

@@ -1,0 +1,71 @@
+﻿<link rel="import" href="../bower_components/polymer/polymer.html" />
+<link rel="import" href="bootstrap.html" />
+<dom-module id="poly-popup">
+    <style>
+        .whole-screen {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0; 
+            right: 0;
+        }
+    </style>
+    <template>
+        <div id="wrapper" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" on-click="toggle">&times;</button>
+                        <h4 class="modal-title">[[header]]</h4>
+                    </div>
+                    <div class="modal-body">
+                        <content></content>
+                    </div>
+                    <template is="dom-if" if="[[showFooter]]">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" on-click="toggle">Close</button>
+                    </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'poly-popup',
+        properties: {
+            header: {
+                type: String,
+                value: '',
+                reflectToAttribute: true
+            },
+            modalToggled: {
+                type: Boolean,
+                value: false,
+                reflectToAttribute: true
+            },
+            showFooter: {
+                type: Boolean,
+                value: true
+            }
+        },
+        ready: function () {
+            var me = this;
+            
+        },
+        toggle: function () {
+            //console.log('toggled');
+            this.modalToggled = !this.modalToggled;
+            this.setToggled(this.modalToggled);
+        },
+        setToggled: function (state) {
+            //this.classList.toggle('whole-screen');
+            var cssDisplay = state === true ? 'block' : 'none';
+            var cssOpacity = state === true ? 1 : 0;
+            this.$.wrapper.style.display = cssDisplay;
+            this.$.wrapper.style.opacity = cssOpacity;
+        }     
+    });
+</script>

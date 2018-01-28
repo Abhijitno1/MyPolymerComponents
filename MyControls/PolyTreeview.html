@@ -1,0 +1,102 @@
+﻿<link rel="import" href="../bower_components/polymer/polymer.html" />
+<link rel="import" href="bootstrap.html" />
+<link rel="import" href="FontAwesome.html" />
+
+<dom-module id="poly-treeview">
+    <style>
+    </style>
+    <template>
+        <div id="wrapper">
+            <ul class="nav nav-pills nav-stacked">
+                <li class="presentation">
+                    <a href="javascript:void(0)">
+                        <div>
+                            <template is="dom-if" if="{{showPlusIcon}}">
+                                <i class="fa fa-plus" on-click="expandBranch"></i>
+                            </template>
+                            <template is="dom-if" if="{{showMinusIcon}}">
+                                <i class="fa fa-minus" on-click="collapseBranch"></i>
+                            </template>
+                            <template is="dom-if" if="{{checkItem}}">
+                                <i class="fa fa-square-o" on-click="selectItem"></i>
+                            </template>
+                            <template is="dom-if" if="{{uncheckItem}}">
+                                <i class="fa fa-check fa-square-o" on-click="unselectItem"></i>
+                            </template>
+                            <span>{{branch.name}}</span>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+            <div class="tree" ng-if="branch.isExpanded">
+                <ul class="nav nav-pills nav-stacked">
+                    <li class="presentation" ng-repeat="child in branch.children">
+                        <tree-view branch="child"></tree-view>
+                    </li>
+                </ul>
+            </div>
+                </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'poly-treeview',
+        properties: {
+            branch: {
+                type: Object,
+                value: {
+                    id: 'root',
+                    name: '',
+                    children: [],
+                    isExpanded: false,
+                    isSelected: false,
+                }
+                //,reflectToAttribute: true
+            },
+            showPlusIcon: {
+                type: Boolean,
+                computed: 'computeShowPlusIcon(branch)'
+            },
+            showMinusIcon: {
+                type: Boolean,
+                computed: 'computeShowMinusIcon(branch)'
+            },
+            checkItem: {
+                type: Boolean,
+                computed: 'computeCheckItem(branch)'
+            },
+            uncheckItem: {
+                type: Boolean,
+                computed: 'computeUncheckItem(branch)'
+            }
+        },
+        ready: function () {
+            var me = this;
+
+        },
+        computeShowPlusIcon: function (branch) {
+            return (branch.children.length > 0 && !branch.isExpanded);
+        },
+        expandBranch: function () {
+            this.branch.isExpanded = true
+        },
+        computeShowMinusIcon: function(branch) {
+            return (branch.children.length>0 && branch.isExpanded);
+        },
+        collapseBranch: function () {
+            this.branch.isExpanded = false;
+        },
+        computeCheckItem: function (branch) {
+            return !branch.isSelected;
+        },
+        selectItem: function () {
+            this.branch.isSelected = true;
+        },
+        computeUncheckItem: function (branch) {
+            return branch.isSelected;
+        },
+        unselectItem: function () {
+            this.branch.isSelected = false;
+        }
+    });
+</script>

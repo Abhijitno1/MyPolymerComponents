@@ -1,0 +1,157 @@
+﻿<link rel="import" href="../bower_components/polymer/polymer.html" />
+<link rel="import" href="bootstrap.html" />
+<dom-module id="poly-combobox">
+    <template>
+        <style>
+            span.input-group-addon {
+                width: auto;
+            }
+            div#wrapper {
+                position: relative;
+            }
+            .dropdown-menu {
+                overflow: auto;
+            }
+        </style>
+        <div id="wrapper">
+            <div class="input-group">
+                <input class="form-control" type="text" placeholder="[[placeholder]]" autocomplete="off" value="{{text::input}}" />
+                <span class="input-group-addon dropdown-toggle" on-click="toggle">
+                    <span class="caret"></span>
+                </span>
+            </div>
+            <ul class="dropdown-menu">
+                <template id="comboItems" is="dom-repeat" items="[[options]]" filter="{{computeFilter(text)}}">
+                    <li data-value$="[[item.value]]" on-click="itemSelected">
+                        <a href="#" on-click="itemSelected">[[item.text]]</a>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'poly-combobox',
+        properties: {
+            options: {
+                type: Array,
+                value: []
+            },
+            selectToggled: {
+                type: Boolean,
+                value: false
+            },
+            comboWidth: {
+                type: String,
+                value: '200px'
+            },
+            pickerWidth: {
+                type: String
+            },
+            pickerMaxHeight: {
+                type: String,
+                value: '220px'
+            },
+            placeholder: {
+                type: String,
+                value: 'Choose an item'
+            },
+            value: {
+                type: String,
+                value: '',
+                reflectToAttribute: true,
+                observer: 'valueChanged'
+            },
+            text: {
+                type: String,
+                reflectToAttribute: true
+            }
+        },
+        observers: [
+            'widthChanged(comboWidth, pickerWidth, pickerMaxHeight)'
+        ],
+        ready: function () {
+            var me = this;
+            
+            /*this.$.wrapper.querySelector('.input-group').addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                event.cancelBubble = true;
+                event.returnValue = false;
+            });
+            document.body.addEventListener('click', function () {
+                me.setToggled(false);
+            });*/
+            this.$.wrapper.querySelector('.input-group').style.width = this.comboWidth;
+            this.$.wrapper.querySelector('.dropdown-menu').style.width = this.comboWidth;
+            this.$.wrapper.querySelector('.dropdown-menu').style.maxHeight = this.pickerMaxHeight;
+        },
+        widthChanged: function (comboWidth, pickerWidth, pickerMaxHeight) {
+            this.$.wrapper.querySelector('.input-group').style.width = comboWidth;
+            this.$.wrapper.querySelector('.dropdown-menu').style.width = pickerWidth || comboWidth;
+            this.$.wrapper.querySelector('.dropdown-menu').style.maxHeight = pickerMaxHeight;
+        },
+        valueChanged: function(newValue, oldValue) {
+            var lis = this.$.wrapper.querySelectorAll('.dropdown-menu li');
+            for (var i = 0; i < lis.length; i++) {
+                if (lis[i].getAttribute('data-value') === newValue) {
+                    lis[i].classList.add('active');
+                    this.text = lis[i].firstChild.innerText;
+                }
+                else {
+                    lis[i].classList.remove('active');
+                }
+            }
+        },
+        computeFilter: function(text) {
+            return function(item) {
+                return item.text.toLowerCase().indexOf(text.toLowerCase()) > -1;
+            }
+        },
+        toggle: function () {
+            //console.log('toggled');
+            this.selectToggled = !this.selectToggled;
+            this.setToggled(this.selectToggled);
+        },
+        setToggled: function(state) {
+            var cssDisplay = state === true ? 'block' : 'none';
+            this.$$('.dropdown-menu').style.display = cssDisplay;
+        },
+        addListItem: function(value, text) {
+            if (text === undefined) text = value;
+            this.push('options', { text: text, value: value });
+        },
+        removeListItem: function(value) {
+            var lis = this.options;
+            var foundIndex = -1;
+            for (var i = 0; i < lis.length; i++) {
+                if (this.options[i].value === value) {
+                    foundIndex = i;
+                    break;
+                }
+            }
+            if (foundIndex > -1)
+                this.splice('options', foundIndex, 1);
+        },
+        itemSelected: function (e) {
+            e.preventDefault();
+            var lis = this.$$('.dropdown-menu').querySelectorAll('li');
+            for (var i = 0; i < lis.length; i++) {
+                if (lis[i] === e.target.parentNode) {
+                    lis[i].classList.add('active');
+                    this.value = lis[i].getAttribute('data-value');
+                    this.text = e.target.innerText;
+                }
+                else {
+                    lis[i].classList.remove('active');
+                }
+            }
+            this.setToggled(false);
+            this.fire("item-selected", {
+                listItem: e.model.item,
+                index: e.model.index
+            });
+        }
+    });
+</script>

@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Test Page for my Polymer Treeview Control</title>
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="PolyTreeview.html" />
+    <style>
+        body {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body unresolved>
+    <div>
+        <poly-treeview></poly-treeview>
+    </div>
+    <br />
+    <script>
+        var treedata = newItem(0, "Portal");
+        var item1 = addChild(treedata, 1, "Search");
+        var item2 = addChild(treedata, 2, "Dashboard");
+        var item3 = addChild(treedata, 3, "Item 3");
+        var item4 = addChild(treedata, 4, "Item 4");
+
+        item4.isSelected = true;
+        item1.isExpanded = true;
+        addChild(item1, 5, "Policy Search.");
+        addChild(item1, 6, "Claims Search.");
+        addChild(item2, 7, "Underwriter Dashboard.");
+        addChild(item2, 8, "Claims Dashboard.");
+
+        var myCombo = document.querySelector('poly-treeview');
+        myCombo.branch = treedata;
+
+        function newItem(id, name) {
+            return {
+                id: id,
+                name: name,
+                children: [],
+                isExpanded: false,
+                isSelected: false,
+            };
+        }
+
+        function addChild(parent, id, name) {
+            var child = newItem(id, name);
+            child.parent = parent;
+            parent.children.push(child);
+            return child;
+        }
+
+    </script>
+</body>
+</html>

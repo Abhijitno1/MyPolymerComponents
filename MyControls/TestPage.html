@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Test Page for my Polymer Controls</title>
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="PolyCombobox.html" />
+    <link rel="import" href="PolyCheckCombobox.html" />
+    <link rel="import" href="PolyPopup.html" />
+    <style>
+        body {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body unresolved>
+    <div>
+        <poly-combobox></poly-combobox>
+        <br /><button onclick="testRemove()">Click Me</button>
+    </div>
+    <br />
+    <div>
+        <poly-check-combobox></poly-check-combobox>
+    </div>
+    <br />
+    <div>
+        <poly-popup header="Polymer Popup Window">
+            <h3>This is my custom popup</h3>
+            <p>Some text in the modal.</p>
+        </poly-popup>
+        <br /><button onclick="openPopup()">Open Popup</button>
+    </div>
+    <script>
+        var myCombo = document.querySelector('poly-combobox');
+        /*
+        myCombo.pickerWidth = "400px";
+        myCombo.addListItem('S', 'Small (S)');
+        myCombo.addListItem('M', 'Medium (M)');
+        myCombo.addListItem('L', 'Large (L)');
+        */
+        var array = new Array(8);
+        for (var i = 0; i < array.length; i++) {
+            array[i] = { value: 'val' + i, text: 'List Item ' + i };
+        }
+        myCombo.options = array;
+        myCombo.addEventListener('item-selected', function (e) {
+            console.log(e.detail);
+        });
+        function testRemove() {
+            myCombo.removeListItem('3');
+        }
+
+        var myCombo2 = document.querySelector('poly-check-combobox');
+        myCombo2.options = [
+            { value: 'S', text: 'Small (S)', isSelected: false },
+            { value: 'M', text: 'Medium (M)', isSelected: false },
+            { value: 'L', text: 'Large (L)', isSelected: false }
+        ];
+        myCombo2.value = ['S', 'M'];
+
+        function openPopup() {
+            var myPopup = document.querySelector('poly-popup');
+            myPopup.toggle();
+        }
+    </script>
+</body>
+</html>
